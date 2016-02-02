@@ -26,3 +26,11 @@
 *.exe
 *.out
 *.app
+
+/Default/
+/CMakeCache.txt
+/Makefile
+/compile_commands.json
+/cmake_install.cmake
+/CMakeFiles/
+/bin/
