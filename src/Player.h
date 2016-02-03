@@ -7,13 +7,16 @@
 #include <Core/Vec2.h>
 #include <Core/Timer.h>
 #include <Core/Resources.h>
+#include <Core/Audio.h>
 
 #include <Render/Sprite.h>
 #include <Render/Animation.h>
 
 #include <IO/Keyboard.h>
+#include <IO/Mouse.h>
 
 #include "globals.h"
+#include "Map.h"
 
 enum turn_side{
     SIDE_NONE = 0, // staying
@@ -25,7 +28,7 @@ enum turn_side{
 
 class Player: public Object {
 public:
-    Player();
+    Player(Map* map);
     Player(const Player& orig);
     virtual ~Player();
     
@@ -35,6 +38,8 @@ public:
     void OnRender();
     
 private:
+    Map* _map;
+    
     Sprite _sprite;
     
     Animation _anim_stay;
@@ -45,6 +50,9 @@ private:
     turn_side _side;
     
     Timer _input_timer;
+    
+    Audio* _waves;
+    Audio* _birds;
 };
 
 #endif	/* PLAYER_H */
