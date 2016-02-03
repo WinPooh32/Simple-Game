@@ -38,6 +38,8 @@ public:
     void OnRender();
     
 private:
+    unsigned int _speed; //keyboard delay, lower is faster
+    
     Map* _map;
     
     Sprite _sprite;
@@ -50,6 +52,7 @@ private:
     turn_side _side;
     
     Timer _input_timer;
+    Timer _music_change_timer;
     
     Audio* _waves;
     Audio* _birds;

@@ -3,6 +3,9 @@
 
 Vec2 sprite_size(16, 16);
 
+#define GRASS_SPEED 100
+#define TREE_SPEED 500
+
 Player::Player(Map* map) {
     _map = map;
 
@@ -64,30 +67,54 @@ void Player::Turn(turn_side side) {
             _sprite.SetFlip(SDL_FLIP_HORIZONTAL);
             if (_side != side) _sprite.SetAnimation(_anim_run_left);
 
-            if (_map->CanMove((GetGlobalPos() + right) * grid))
+            if (_map->CanMove((GetGlobalPos() + right) * grid)) {
+                if (_map->GetTile((GetGlobalPos() + right) * grid) == TILE_TREE) {
+                    _speed = TREE_SPEED;
+                } else {
+                    _speed = GRASS_SPEED;
+                }
                 Move(right);
+            }
             break;
 
         case SIDE_LEFT:
             _sprite.SetFlip(SDL_FLIP_NONE);
             if (_side != side) _sprite.SetAnimation(_anim_run_left);
 
-            if (_map->CanMove((GetGlobalPos() + left) * grid))
+            if (_map->CanMove((GetGlobalPos() + left) * grid)) {
+                if (_map->GetTile((GetGlobalPos() + left) * grid) == TILE_TREE) {
+                    _speed = TREE_SPEED;
+                } else {
+                    _speed = GRASS_SPEED;
+                }
                 Move(left);
+            }
             break;
 
         case SIDE_UP:
             if (_side != side) _sprite.SetAnimation(_anim_run_up);
 
-            if (_map->CanMove((GetGlobalPos() + up) * grid))
+            if (_map->CanMove((GetGlobalPos() + up) * grid)) {
+                if (_map->GetTile((GetGlobalPos() + up) * grid) == TILE_TREE) {
+                    _speed = TREE_SPEED;
+                } else {
+                    _speed = GRASS_SPEED;
+                }
                 Move(up);
+            }
             break;
 
         case SIDE_DOWN:
             if (_side != side) _sprite.SetAnimation(_anim_run_down);
 
-            if (_map->CanMove((GetGlobalPos() + down) * grid))
+            if (_map->CanMove((GetGlobalPos() + down) * grid)) {
+                if (_map->GetTile((GetGlobalPos() + down) * grid) == TILE_TREE) {
+                    _speed = TREE_SPEED;
+                } else {
+                    _speed = GRASS_SPEED;
+                }
                 Move(down);
+            }
             break;
 
         case SIDE_NONE:
@@ -97,33 +124,32 @@ void Player::Turn(turn_side side) {
     if (side != SIDE_NONE) {
         _side = side;
         _sprite.SetAnimationRate(300);
+    }
 
-        if (_map->GetTile((GetGlobalPos() + left * 3) * grid) == TILE_WATER ||
-                _map->GetTile((GetGlobalPos() + right * 3) * grid) == TILE_WATER ||
-                _map->GetTile((GetGlobalPos() + up * 3) * grid) == TILE_WATER ||
-                _map->GetTile((GetGlobalPos() + down * 3) * grid) == TILE_WATER) {
+    _music_change_timer.Start();
+    if (_music_change_timer.GetTime() > 5000) {
+        if (_map->GetTile((GetGlobalPos() + left * 1) * grid) == TILE_WATER ||
+                _map->GetTile((GetGlobalPos() + right * 1) * grid) == TILE_WATER ||
+                _map->GetTile((GetGlobalPos() + up * 1) * grid) == TILE_WATER ||
+                _map->GetTile((GetGlobalPos() + down * 1) * grid) == TILE_WATER) {
 
             if (!water) {
-                //Mix_FadeOutMusic(500);
                 _waves->Play(-1);
                 water = true;
             }
         } else {
             if (water) {
-                //Mix_FadeOutMusic(500);
                 _birds->Play(-1);
-
                 water = false;
             }
         }
-
-
+        _music_change_timer.Stop();
     }
 }
 
 void Player::OnUpdate() {
     _input_timer.Start();
-    if (_input_timer.GetTime() > 100) {
+    if (_input_timer.GetTime() > _speed) {
         if (Keyboard::isKeyDown(KEY_RIGHT)) {
             Turn(SIDE_RIGHT);
         } else if (Keyboard::isKeyDown(KEY_LEFT)) {
