@@ -13,6 +13,7 @@
 
 #include "Player.h"
 #include "Map.h"
+//#include "Tree.h"
 
 Map* map;
 
@@ -23,12 +24,14 @@ Object* layer_nature; //mountains, trees
 
 Player* player;
 
+int edit_tile = TILE_GRASS;
+
 void Engine::OnInit() {
     Resources::SetDefaultFont("PressStart2P.ttf");
     Window::SetMode(800, 600, false, "Simple-Game v0.1");
-    
+
     //SDL_SetRelativeMouseMode(SDL_bool(1));
-    
+
     Engine::AddLayer();
     Engine::AddLayer();
     Engine::AddLayer();
@@ -50,7 +53,7 @@ void Engine::OnEvent(SDL_Event *event, const Uint8 *keyboardState) {
 
 }
 
-float mgrid = 1.0f/32.0f;
+float mgrid = 1.0f / 32.0f;
 
 void Engine::OnUpdate() {
     if (Mouse::InWindow()) {
@@ -68,14 +71,45 @@ void Engine::OnUpdate() {
         } else if (y > Window::GetHeight() - 10) {
             Window::GetCamera()->Move(Vec2(0, 5));
         }
-        
+
         Vec2 camoffset(Window::GetCamera()->X(), Window::GetCamera()->Y());
-        
-        if(Mouse::Pressed(MOUSE_LEFT)){
-            map->SetTile((Mouse::GetPos()+camoffset) * mgrid, TILE_GRASS);
+        //tile mtile = map->GetTile((Mouse::GetPos() + camoffset) * mgrid);
+
+        if (Mouse::Pressed(MOUSE_LEFT)) {
+            map->SetTile((Mouse::GetPos() + camoffset) * mgrid, static_cast<tile> (edit_tile));
         }
-        else if(Mouse::Pressed(MOUSE_RIGHT)){
-            map->SetTile((Mouse::GetPos()+camoffset) * mgrid, TILE_WATER);
+    
+        if (Mouse::AnyWheeled()) {
+            if (Mouse::Wheeled(MOUSE_WHEEL_UP)) {
+                ++edit_tile;
+            } else {
+                --edit_tile;
+            }
+
+            if (edit_tile >= TILE_NONE) {
+                edit_tile = TILE_GRASS;
+            } else if (edit_tile < 0) {
+                edit_tile = TILE_NONE - 1;
+            }
+
+            switch (edit_tile) {
+                case TILE_GRASS:
+                    std::cout << "GRASS" << std::endl;
+                    break;
+                case TILE_TREE:
+                    std::cout << "TREE" << std::endl;
+                    break;
+                case TILE_WATER:
+                    std::cout << "WATER" << std::endl;
+                    break;
+                case TILE_MOUNTAIN:
+                    std::cout << "MOUNTAIN" << std::endl;
+                    break;
+                case TILE_BUILDING:
+                    std::cout << "BUILDING" << std::endl;
+                    break;
+            }
+
         }
     }
 }
