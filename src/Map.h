@@ -13,7 +13,11 @@
 enum tile{
     TILE_GRASS = 0,
     TILE_WATER,
-    TILE_OBJECT
+    TILE_TREE,
+    TILE_MOUNTAIN,
+    TILE_OBJECT,
+    TILE_BUILDING,
+    TILE_NONE // END OF TILES
 };
 
 class Map {
@@ -39,6 +43,8 @@ private:
     
     Sprite _sprite_grass;
     Sprite _sprite_water;
+    Sprite _sprite_mountain;
+    Sprite _sprite_tree;
 };
 
 #endif	/* MAP_H */

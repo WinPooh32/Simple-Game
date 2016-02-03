@@ -17,6 +17,16 @@ Map::Map() {
     _sprite_water.SetTexture(Resources::GetTexture("blowhard.png"));
     _sprite_water.SetFrameSize(frame);
     _sprite_water.SetFrame(16);
+    
+    //setup mountain
+    _sprite_mountain.SetTexture(Resources::GetTexture("blowhard.png"));
+    _sprite_mountain.SetFrameSize(frame);
+    _sprite_mountain.SetFrame(14);
+    
+    //setup tree
+    _sprite_tree.SetTexture(Resources::GetTexture("blowhard.png"));
+    _sprite_tree.SetFrameSize(frame);
+    _sprite_tree.SetFrame(12);
 }
 
 Map::Map(const Map& orig) {
@@ -69,7 +79,7 @@ bool Map::Load(std::string path) {
         size_t ntile;
         
         while (line_stream >> ntile) {
-            if(ntile > TILE_WATER){
+            if(ntile > TILE_NONE){
                 std::cerr << "Wrong tile: " << ntile << std::endl;
                 return false;
             }
@@ -98,7 +108,14 @@ void Map::Draw(){
                 case TILE_OBJECT:
                 case TILE_GRASS:
                     draw_sprite = &_sprite_grass;
-                     _sprite_grass.SetFrame(10);
+                    break;
+                    
+                case TILE_MOUNTAIN:
+                    draw_sprite = &_sprite_mountain;
+                    break;
+                    
+                case TILE_TREE:
+                    draw_sprite = &_sprite_tree;
                     break;
                     
                 case TILE_WATER:
@@ -129,7 +146,7 @@ bool Map::CanMove(const Vec2& pos){
     }
     
     tile mtile = _Tile_map[static_cast<int>(pos.y)][static_cast<int>(pos.x)];
-    if(mtile == TILE_WATER){
+    if(mtile == TILE_WATER || mtile == TILE_MOUNTAIN || mtile == TILE_BUILDING){
         return false;
     }
     
