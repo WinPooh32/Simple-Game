@@ -1,17 +1,13 @@
 #include "Player.h"
-#include "Map.h"
-
-Vec2 sprite_size(16, 16);
-
-#define GRASS_SPEED 100
-#define TREE_SPEED 500
 
 Player::Player(Map* map) {
+    _speed = TREE_SPEED;
+    _water_sounds = false;
     _map = map;
-
-    SetSize(sprite_size);
-
     _side = SIDE_LEFT;
+    
+    Vec2 sprite_size(16, 16);
+    SetSize(sprite_size);
 
     //Staying anim depends on looking side
     _anim_stay.SetBeginFrame(0);
@@ -42,79 +38,44 @@ Player::Player(Map* map) {
     //Setup audio
     _birds = Resources::GetAudio("birds.ogg", AUDIO_MUSIC);
     _waves = Resources::GetAudio("waves.ogg", AUDIO_MUSIC);
+
+    _birds->Play(-1);
 }
 
-Player::Player(const Player& orig) {
+void Player::MoveIt(const Vec2& offset) {
+    tile mtile = _map->GetTile(GetGlobalPos() * Map::GRID_SCALE + offset);
+    if (_map->CanMove(mtile)) {
+        if (mtile == TILE_TREE || mtile == TILE_TREE_SPRUCE) {
+            _speed = TREE_SPEED;
+        } else {
+            _speed = GRASS_SPEED;
+        }
+        Move(offset * Map::SCALED_TILE_SIZE);
+    }
 }
-
-Player::~Player() {
-
-}
-
-int STEP = 32;
-Vec2 right(STEP, 0);
-Vec2 left(-STEP, 0);
-Vec2 up(0, -STEP);
-Vec2 down(0, STEP);
-
-float grid = 1.0f / 32;
-
-bool water = false;
 
 void Player::Turn(turn_side side) {
     switch (side) {
         case SIDE_RIGHT:
             _sprite.SetFlip(SDL_FLIP_HORIZONTAL);
             if (_side != side) _sprite.SetAnimation(_anim_run_left);
-
-            if (_map->CanMove((GetGlobalPos() + right) * grid)) {
-                if (_map->GetTile((GetGlobalPos() + right) * grid) == TILE_TREE) {
-                    _speed = TREE_SPEED;
-                } else {
-                    _speed = GRASS_SPEED;
-                }
-                Move(right);
-            }
+            MoveIt(Vec2::Right);
             break;
 
         case SIDE_LEFT:
             _sprite.SetFlip(SDL_FLIP_NONE);
             if (_side != side) _sprite.SetAnimation(_anim_run_left);
-
-            if (_map->CanMove((GetGlobalPos() + left) * grid)) {
-                if (_map->GetTile((GetGlobalPos() + left) * grid) == TILE_TREE) {
-                    _speed = TREE_SPEED;
-                } else {
-                    _speed = GRASS_SPEED;
-                }
-                Move(left);
-            }
+            MoveIt(Vec2::Left);
             break;
 
         case SIDE_UP:
             if (_side != side) _sprite.SetAnimation(_anim_run_up);
-
-            if (_map->CanMove((GetGlobalPos() + up) * grid)) {
-                if (_map->GetTile((GetGlobalPos() + up) * grid) == TILE_TREE) {
-                    _speed = TREE_SPEED;
-                } else {
-                    _speed = GRASS_SPEED;
-                }
-                Move(up);
-            }
+            MoveIt(Vec2::Up);
             break;
 
         case SIDE_DOWN:
             if (_side != side) _sprite.SetAnimation(_anim_run_down);
-
-            if (_map->CanMove((GetGlobalPos() + down) * grid)) {
-                if (_map->GetTile((GetGlobalPos() + down) * grid) == TILE_TREE) {
-                    _speed = TREE_SPEED;
-                } else {
-                    _speed = GRASS_SPEED;
-                }
-                Move(down);
-            }
+            MoveIt(Vec2::Down);
             break;
 
         case SIDE_NONE:
@@ -127,23 +88,31 @@ void Player::Turn(turn_side side) {
     }
 
     _music_change_timer.Start();
-    if (_music_change_timer.GetTime() > 5000) {
-        if (_map->GetTile((GetGlobalPos() + left * 1) * grid) == TILE_WATER ||
-                _map->GetTile((GetGlobalPos() + right * 1) * grid) == TILE_WATER ||
-                _map->GetTile((GetGlobalPos() + up * 1) * grid) == TILE_WATER ||
-                _map->GetTile((GetGlobalPos() + down * 1) * grid) == TILE_WATER) {
+    if (_music_change_timer.GetTime() > 3000) {
+        
+        Vec2 grid_pos = GetGlobalPos() * Map::GRID_SCALE;
+        
+        if (_map->GetTileNear(grid_pos, Vec2::Left) == TILE_WATER  ||
+            _map->GetTileNear(grid_pos, Vec2::Right) == TILE_WATER ||
+            _map->GetTileNear(grid_pos, Vec2::Up) == TILE_WATER    ||
+            _map->GetTileNear(grid_pos, Vec2::Down) == TILE_WATER ){
 
-            if (!water) {
+            if (!_water_sounds) {
                 _waves->Play(-1);
-                water = true;
+                _water_sounds = true;
             }
         } else {
-            if (water) {
+            if (_water_sounds) {
                 _birds->Play(-1);
-                water = false;
+                _water_sounds = false;
             }
         }
         _music_change_timer.Stop();
+    }
+
+    if (!_freecam) {
+        Vec2 campos(GetGlobalPos().x - Window::GetWidth()*0.5, GetGlobalPos().y - Window::GetHeight()*0.5);
+        Window::GetCamera()->SetPos(campos);
     }
 }
 
