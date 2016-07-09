@@ -169,8 +169,7 @@ void Engine::OnRender() {
     map->Draw();
 
     if (edit_mode) {
-        Vec2 cam_offset(Window::GetCamera()->X(), Window::GetCamera()->Y());
-        map->DrawDebugTileRect((Mouse::GetPos() + cam_offset) * mgrid, static_cast<tile> (edit_tile));
+        map->DrawDebugTileRect((Mouse::GetPos() + Window::GetCamera()->GetPos()) * mgrid, static_cast<tile> (edit_tile));
 
         label_current_tile->Draw();
     }
