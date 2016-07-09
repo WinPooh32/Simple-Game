@@ -39,6 +39,8 @@ Map::Map() {
     _sprite_tree_spruce.SetTexture(Resources::GetTexture("blowhard.png"));
     _sprite_tree_spruce.SetFrameSize(frame);
     _sprite_tree_spruce.SetFrame(32);
+
+    _nosprite.SetFrameSize(frame);
 }
 
 Map::Map(const Map& orig) {
@@ -272,12 +274,10 @@ void Map::DrawDebugTileRect(const Vec2& pos, tile mtile) {
         return;
     }
 
-    //Sprite* draw_sprite;
-
-    //rect = {pos.x - int(pos.x)%32 - Window::GetCamera()->X(), pos.y - int(pos.y)%32 - Window::GetCamera()->Y(), 33, 33};
-    //Surface::DrawRect(&rect, COLOR_YELLOW);
-
-    //draw_sprite->Draw(Vec2(pos.x - int(pos.x) % 32, pos.y - int(pos.y) % 32), Vec2(32, 32), Window::GetCamera());
+    SDL_Rect tile_border_pos = {(int)pos.x*32 - Window::GetCamera()->X() - 1,
+                            (int)pos.y*32 - Window::GetCamera()->Y() - 1,
+                            34, 34};
+    Surface::DrawRect(&tile_border_pos, COLOR_YELLOW);
 
     DrawTile(Vec2((int) pos.x, (int) pos.y), mtile);
 }
