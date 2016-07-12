@@ -24,8 +24,12 @@ enum tile {
 
 class Map {
 public:
-    static constexpr float GRID_SCALE = 1.0f / 32.0f;
-    static constexpr int SCALED_TILE_SIZE = 32;
+    //static constexpr int SCALED_TILE_SIZE = 16 * 2;
+    //static constexpr float GRID_SCALE = 1.0f / SCALED_TILE_SIZE;
+    static int SCALED_TILE_SIZE;
+    static float GRID_SCALE;
+
+    static void Zoom(float scale);
 
     Map();
     Map(const Map& orig);
@@ -44,6 +48,9 @@ public:
     bool SetTile(const Vec2& pos, tile mtile);
     tile GetTile(const Vec2& pos);
     tile GetTileNear(const Vec2& pos, const Vec2& side_offset);
+
+    size_t GetW();
+    size_t GetH();
 
 private:
     tile** _Tile_map;

@@ -1,7 +1,7 @@
 #include "Map.h"
 
-constexpr float Map::GRID_SCALE;
-constexpr int Map::SCALED_TILE_SIZE;
+float Map::GRID_SCALE;
+int Map::SCALED_TILE_SIZE;
 
 Map::Map() {
     _max_grid_x = 0;
@@ -41,6 +41,8 @@ Map::Map() {
     _sprite_tree_spruce.SetFrame(32);
 
     _nosprite.SetFrameSize(frame);
+
+    Zoom(2);
 }
 
 Map::Map(const Map& orig) {
@@ -49,6 +51,11 @@ Map::Map(const Map& orig) {
 
 Map::~Map() {
 
+}
+
+void Map::Zoom(float scale){
+    SCALED_TILE_SIZE =16 * scale ;
+    GRID_SCALE = 1.0f / SCALED_TILE_SIZE;
 }
 
 bool Map::Load(std::string path) {
@@ -134,11 +141,13 @@ bool Map::SaveMap(std::string path) {
 
 void Map::DrawTile(const Vec2& pos_local, tile mtile) {
 
-    tile left, right, up, down;
+    tile left  = GetTile(pos_local + Vec2::Left);
+    tile right = GetTile(pos_local + Vec2::Right);
+    tile up    = GetTile(pos_local + Vec2::Up);
+    tile down  = GetTile(pos_local + Vec2::Down);
 
     Sprite* draw_sprite;
     switch (mtile) {
-        case TILE_OBJECT:
         case TILE_PLAIN_GRASS:
             draw_sprite = &_sprite_plain_grass;
             break;
@@ -148,6 +157,13 @@ void Map::DrawTile(const Vec2& pos_local, tile mtile) {
             break;
 
         case TILE_MOUNTAIN:
+            if (right == TILE_MOUNTAIN
+                && left == TILE_MOUNTAIN
+                && up == TILE_MOUNTAIN){
+                _sprite_mountain.SetFrame(15);
+            }else{
+                _sprite_mountain.SetFrame(14);
+            }
             draw_sprite = &_sprite_mountain;
             break;
 
@@ -163,11 +179,6 @@ void Map::DrawTile(const Vec2& pos_local, tile mtile) {
             draw_sprite = &_sprite_water;
 
             _sprite_water.SetFlip(SDL_FLIP_NONE);
-
-            left = GetTile(pos_local + Vec2::Left);
-            right = GetTile(pos_local + Vec2::Right);
-            up = GetTile(pos_local + Vec2::Up);
-            down = GetTile(pos_local + Vec2::Down);
 
             if (left != TILE_WATER && right != TILE_WATER && up != TILE_WATER && down != TILE_WATER) {
                 _sprite_water.SetFrame(20);
@@ -251,11 +262,12 @@ void Map::DrawTile(const Vec2& pos_local, tile mtile) {
 
             break;
 
+        case TILE_OBJECT:
         default:
             draw_sprite = &_nosprite;
     }
 
-    draw_sprite->Draw(pos_local * 32, Vec2(32, 32), Window::GetCamera());
+    draw_sprite->Draw(pos_local * SCALED_TILE_SIZE, Vec2(SCALED_TILE_SIZE, SCALED_TILE_SIZE), Window::GetCamera());
 }
 
 void Map::Draw() {
@@ -274,9 +286,9 @@ void Map::DrawDebugTileRect(const Vec2& pos, tile mtile) {
         return;
     }
 
-    SDL_Rect tile_border_pos = {(int)pos.x*32 - Window::GetCamera()->X() - 1,
-                            (int)pos.y*32 - Window::GetCamera()->Y() - 1,
-                            34, 34};
+    SDL_Rect tile_border_pos = {(int)pos.x*SCALED_TILE_SIZE - Window::GetCamera()->X() - 1,
+                            (int)pos.y*SCALED_TILE_SIZE - Window::GetCamera()->Y() - 1,
+                            SCALED_TILE_SIZE + 2, SCALED_TILE_SIZE + 2};
     Surface::DrawRect(&tile_border_pos, COLOR_YELLOW);
 
     DrawTile(Vec2((int) pos.x, (int) pos.y), mtile);
@@ -339,4 +351,12 @@ tile Map::GetTile(const Vec2& pos) {
 tile Map::GetTileNear(const Vec2& pos, const Vec2& side_offset){
     Vec2 next(pos.x + side_offset.x, pos.y + side_offset.y);
     return GetTile(next);
+}
+
+size_t Map::GetW(){
+    return _max_grid_x;
+}
+
+size_t Map::GetH(){
+    return _max_grid_y;
 }

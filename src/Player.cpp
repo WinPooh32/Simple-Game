@@ -5,6 +5,8 @@ Player::Player(Map* map) {
     _water_sounds = false;
     _map = map;
     _side = SIDE_LEFT;
+
+    _sound_mgr = new SoundManager(_map);
     
     Vec2 sprite_size(16, 16);
     SetSize(sprite_size);
@@ -34,23 +36,24 @@ Player::Player(Map* map) {
     _sprite.SetAnimation(_anim_run_left);
     _sprite.SetFrameSize(sprite_size);
     _sprite.SetAnimationRate(300);
+}
 
-    //Setup audio
-    _birds = Resources::GetAudio("birds.ogg", AUDIO_MUSIC);
-    _waves = Resources::GetAudio("waves.ogg", AUDIO_MUSIC);
-
-    _birds->Play(-1);
+Player::~Player(){
+    delete _sound_mgr;
 }
 
 void Player::MoveIt(const Vec2& offset) {
-    tile mtile = _map->GetTile(GetGlobalPos() * Map::GRID_SCALE + offset);
+
+    tile mtile = _map->GetTile(GetGlobalPos() + offset);
     if (_map->CanMove(mtile)) {
         if (mtile == TILE_TREE || mtile == TILE_TREE_SPRUCE) {
             _speed = TREE_SPEED;
         } else {
             _speed = GRASS_SPEED;
         }
-        Move(offset * Map::SCALED_TILE_SIZE);
+        Move(offset);
+
+        _sound_mgr->Update(GetGlobalPos());
     }
 }
 
@@ -98,22 +101,19 @@ void Player::Turn(turn_side side) {
             _map->GetTileNear(grid_pos, Vec2::Down) == TILE_WATER ){
 
             if (!_water_sounds) {
-                _waves->Play(-1);
+                //_waves->Play(-1);
                 _water_sounds = true;
             }
         } else {
             if (_water_sounds) {
-                _birds->Play(-1);
+                //_birds->Play(-1);
                 _water_sounds = false;
             }
         }
         _music_change_timer.Stop();
     }
 
-    if (!_freecam) {
-        Vec2 campos(GetGlobalPos().x - Window::GetWidth()*0.5, GetGlobalPos().y - Window::GetHeight()*0.5);
-        Window::GetCamera()->SetPos(campos);
-    }
+
 }
 
 void Player::OnUpdate() {
@@ -130,10 +130,37 @@ void Player::OnUpdate() {
         } else {
             Turn(SIDE_NONE);
         }
+
+        if (!_freecam) {
+
+            Vec2 cam_pos = Window::GetCamera()->GetPos();
+            Vec2 cam_view = Window::GetCamera()->GetViewport();
+
+            if(GetGlobalPos().x * Map::SCALED_TILE_SIZE < cam_pos.x + cam_view.x*0.2 ){
+               cam_pos += Vec2::Left*Map::SCALED_TILE_SIZE;
+            }
+            else if(GetGlobalPos().x * Map::SCALED_TILE_SIZE > (cam_pos.x + cam_view.x) - cam_view.x*0.2){
+                cam_pos += Vec2::Right*Map::SCALED_TILE_SIZE;
+            }
+
+
+            if(GetGlobalPos().y * Map::SCALED_TILE_SIZE < cam_pos.y + cam_view.y*0.2 ){
+               cam_pos += Vec2::Up*Map::SCALED_TILE_SIZE;
+            }
+            else if(GetGlobalPos().y * Map::SCALED_TILE_SIZE > (cam_pos.y + cam_view.y) - cam_view.y*0.2){
+                cam_pos += Vec2::Down*Map::SCALED_TILE_SIZE;
+            }
+
+            Window::GetCamera()->SetPos(cam_pos);
+
+            //Vec2 campos(GetGlobalPos().x - Window::GetWidth()*0.5, GetGlobalPos().y - Window::GetHeight()*0.5);
+           // Window::GetCamera()->SetPos(campos);
+        }
+
         _input_timer.Stop();
     }
 }
 
 void Player::OnRender() {
-    _sprite.Draw(GetGlobalPos(), GetSize()*2, Window::GetCamera());
+    _sprite.Draw(GetGlobalPos() * Map::SCALED_TILE_SIZE, Vec2(Map::SCALED_TILE_SIZE, Map::SCALED_TILE_SIZE), Window::GetCamera());
 }

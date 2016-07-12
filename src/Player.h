@@ -17,6 +17,7 @@
 
 #include "globals.h"
 #include "Map.h"
+#include "SoundManager.h"
 
 enum turn_side {
     SIDE_NONE = 0, // staying
@@ -31,6 +32,7 @@ public:
     bool _freecam = false;
 
     Player(Map* map);
+    ~Player();
 
     void Turn(turn_side side);
 
@@ -45,6 +47,7 @@ private:
     bool _water_sounds;
     
     Map* _map;
+    SoundManager* _sound_mgr;
 
     Sprite _sprite;
 

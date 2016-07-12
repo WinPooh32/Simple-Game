@@ -32,7 +32,7 @@ bool edit_mode = false;
 
 Timer keys_timer;
 
-float mgrid = 1.0f / 32.0f;
+float map_scale = 1.0f;
 
 void SetCurrentBrushTile(int tile){
     edit_tile = tile;
@@ -83,7 +83,7 @@ void ProcessEditModeCamera(){
     Vec2 cam_offset(Window::GetCamera()->X(), Window::GetCamera()->Y());
 
     if (Mouse::Pressed(MOUSE_LEFT)) {
-        map->SetTile((Mouse::GetPos() + cam_offset) * mgrid, static_cast<tile> (edit_tile));
+        map->SetTile((Mouse::GetPos() + cam_offset) * Map::GRID_SCALE, static_cast<tile> (edit_tile));
     }
 }
 
@@ -118,6 +118,7 @@ void ProcessEditMode(SDL_Event *event){
 void Engine::OnInit() {
     Resources::SetDefaultFont("PressStart2P.ttf");
     //Window::SetMode(1920, 1080, true, "Simple-Game v0.1");
+    //Window::SetMode(1280, 720, false, "Simple-Game v0.1");
     Window::SetMode(800, 600, false, "Simple-Game v0.1");
     //SDL_SetRelativeMouseMode(SDL_bool(1));
 
@@ -153,8 +154,17 @@ void Engine::OnEvent(SDL_Event *event, const Uint8 *keyboardState) {
         }
     }
 
-    if (Mouse::InWindow() && edit_mode) {
-        ProcessEditMode(event);
+    if (Mouse::InWindow()) {
+        if(edit_mode){
+           ProcessEditMode(event);
+        }else{
+            if(Mouse::Wheeled(MOUSE_WHEEL_UP)){
+                Map::Zoom(map_scale += 0.3f);
+            }
+            if(Mouse::Wheeled(MOUSE_WHEEL_DOWN)){
+                Map::Zoom(map_scale -= 0.3f);
+            }
+        }
     }
 
 }
@@ -169,7 +179,7 @@ void Engine::OnRender() {
     map->Draw();
 
     if (edit_mode) {
-        map->DrawDebugTileRect((Mouse::GetPos() + Window::GetCamera()->GetPos()) * mgrid, static_cast<tile> (edit_tile));
+        map->DrawDebugTileRect((Mouse::GetPos() + Window::GetCamera()->GetPos()) * Map::GRID_SCALE, static_cast<tile> (edit_tile));
 
         label_current_tile->Draw();
     }
