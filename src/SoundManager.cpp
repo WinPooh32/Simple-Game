@@ -39,7 +39,7 @@ void SoundManager::ProcessFading(){
             if(it->is_fadein){
                 it->audio->SetVolume(it->audio->GetVolume() + FADE_SPEED);
 
-                if(it->audio->GetVolume() >= 100){
+                if(it->audio->GetVolume() >= Audio::GetMasterVolume()){
                     _Fade.erase(it);
                 }
             }
@@ -100,7 +100,6 @@ void SoundManager::Update(const Vec2& player_pos){
 
         //Vec2 offset = GetBiomeSoundCenter(static_cast<tile>(chk_tile), player_pos, in_view);
         bool playing = _Sounds[chk_tile][0]->IsPlaying();
-        bool null_vol = _Sounds[chk_tile][0]->GetVolume() == 0;
         bool near = IsNear(static_cast<tile>(chk_tile), player_pos);
         if(near){
             if(!playing){

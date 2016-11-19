@@ -152,6 +152,15 @@ void Engine::OnEvent(SDL_Event *event, const Uint8 *keyboardState) {
         if (Keyboard::isKeyDown(KEY_ESCAPE)){
             Engine::Stop();
         }
+
+        if(Keyboard::isKeyDown(KEY_KP_MINUS)){
+            Audio::SetMasterVolume(Audio::GetMasterVolume() - 5);
+            std::cout << "Volume: " << Audio::GetMasterVolume() << std::endl;
+        }
+        if(Keyboard::isKeyDown(KEY_KP_PLUS)){
+            Audio::SetMasterVolume(Audio::GetMasterVolume() + 5);
+            std::cout << "Volume: " << Audio::GetMasterVolume() << std::endl;
+        }
     }
 
     if (Mouse::InWindow()) {

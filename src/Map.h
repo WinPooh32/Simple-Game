@@ -46,7 +46,7 @@ public:
     bool CanMove(tile mtile);
 
     bool SetTile(const Vec2& pos, tile mtile);
-    tile GetTile(const Vec2& pos);
+    inline tile GetTile(const Vec2& pos);
     tile GetTileNear(const Vec2& pos, const Vec2& side_offset);
 
     size_t GetW();
@@ -70,6 +70,15 @@ private:
 
     void DrawTile(const Vec2& pos_local, tile mtile);
 };
+
+inline
+tile Map::GetTile(const Vec2& pos) {
+    if (pos.x < 0 || pos.y < 0 || pos.x >= _max_grid_x || pos.y >= _max_grid_y) {
+        return TILE_WATER;
+    }
+
+    return _Tile_map[static_cast<int> (pos.y)][static_cast<int> (pos.x)];
+}
 
 #endif	/* MAP_H */
 

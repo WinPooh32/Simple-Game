@@ -159,6 +159,8 @@ void Player::OnUpdate() {
 
         _input_timer.Stop();
     }
+
+    _sound_mgr->ProcessFading();
 }
 
 void Player::OnRender() {

@@ -340,13 +340,6 @@ bool Map::SetTile(const Vec2& pos, tile mtile) {
     return true;
 }
 
-tile Map::GetTile(const Vec2& pos) {
-    if (pos.x < 0 || pos.y < 0 || pos.x >= _max_grid_x || pos.y >= _max_grid_y) {
-        return TILE_WATER;
-    }
-
-    return _Tile_map[static_cast<int> (pos.y)][static_cast<int> (pos.x)];
-}
 
 tile Map::GetTileNear(const Vec2& pos, const Vec2& side_offset){
     Vec2 next(pos.x + side_offset.x, pos.y + side_offset.y);
