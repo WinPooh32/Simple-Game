@@ -37,18 +37,18 @@ void SoundManager::ProcessFading(){
         for(auto it = last; it >= _Fade.begin(); --it){
 
             if(it->is_fadein){
-                it->audio->SetVolume(it->audio->GetVolume() + FADE_SPEED);
-
                 if(it->audio->GetVolume() >= Audio::GetMasterVolume()){
                     _Fade.erase(it);
+                }else{
+                    it->audio->SetVolume(it->audio->GetVolume() + FADE_SPEED);
                 }
             }
             else{
-                it->audio->SetVolume(it->audio->GetVolume() - FADE_SPEED);
-
                 if(it->audio->GetVolume() <= 0){
                     it->audio->Stop();
                     _Fade.erase(it);
+                }else{
+                    it->audio->SetVolume(it->audio->GetVolume() - FADE_SPEED);
                 }
             }
 
