@@ -89,31 +89,6 @@ void Player::Turn(turn_side side) {
         _side = side;
         _sprite.SetAnimationRate(300);
     }
-
-    _music_change_timer.Start();
-    if (_music_change_timer.GetTime() > 3000) {
-        
-        Vec2 grid_pos = GetGlobalPos() * Map::GRID_SCALE;
-        
-        if (_map->GetTileNear(grid_pos, Vec2::Left) == TILE_WATER  ||
-            _map->GetTileNear(grid_pos, Vec2::Right) == TILE_WATER ||
-            _map->GetTileNear(grid_pos, Vec2::Up) == TILE_WATER    ||
-            _map->GetTileNear(grid_pos, Vec2::Down) == TILE_WATER ){
-
-            if (!_water_sounds) {
-                //_waves->Play(-1);
-                _water_sounds = true;
-            }
-        } else {
-            if (_water_sounds) {
-                //_birds->Play(-1);
-                _water_sounds = false;
-            }
-        }
-        _music_change_timer.Stop();
-    }
-
-
 }
 
 void Player::OnUpdate() {
@@ -152,9 +127,6 @@ void Player::OnUpdate() {
             }
 
             Window::GetCamera()->SetPos(cam_pos);
-
-            //Vec2 campos(GetGlobalPos().x - Window::GetWidth()*0.5, GetGlobalPos().y - Window::GetHeight()*0.5);
-           // Window::GetCamera()->SetPos(campos);
         }
 
         _input_timer.Stop();
